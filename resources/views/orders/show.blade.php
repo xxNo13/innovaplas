@@ -6,6 +6,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ asset('plugins/sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/select2/select2.min.css') }}">
 @endpush
 
 @section('content')
@@ -217,7 +218,7 @@
 
     @if ($order->status->name == 'To Pay')
         <div class="modal fade" id="uploadPayment" tabindex="-1" aria-labelledby="uploadPaymentLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title mb-0" id="uploadPaymentLabel">
@@ -228,51 +229,102 @@
                     <div class="modal-body">
                         <form action="{{ route('user.order.upload.payment', $order->id) }}" method="POST" id="paymentForm" enctype="multipart/form-data">
                             @csrf
-                            <div class="design-form mb-3">
-                                <div class="">
-                                    @if (!empty($order->payment))
-                                        <h4>Previous Payment</h4>
-                                        <img src="{{ Storage::url($order->payment_file->path) }}" alt="{{ $order->payment_reference ?? '' }}" style="object-fit: cover;">
-                                    @endif
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="design-form mb-3">
+                                        <div class="">
+                                            @if (!empty($order->payment))
+                                                <h4>Previous Payment</h4>
+                                                <img src="{{ Storage::url($order->payment_file->path) }}" alt="{{ $order->payment_reference ?? '' }}" style="object-fit: cover;">
+                                            @endif
+                                        </div>
+                                        <label for="payment">Payment</label>
+                                        <input type="file" class="form-control" id="payment" name="payment" placeholder="Payment" accept="image/*" {{ !empty($order->payment) ?: 'required' }} />
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="payment_reference">Reference No.</label>
+                                        <input type="text" class="form-control" id="payment_reference" name="payment_reference" placeholder="Enter Reference no." value="{{ old('payment_reference', $order->payment_reference ?? '') }}" required />
+                                        @if ($errors->has('payment_reference'))
+                                            <span class="invalid-feedback" style="display: block;" role="alert">
+                                                <strong>{{ $errors->first('payment_reference') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label for="payment_type">Payment Type (Sent From)</label>
+                                        <select name="payment_type" id="payment_type" class="form-control js-select2" style="width: 100%;" data-tags="true" data-dropdown-parent="#uploadPayment" required>
+                                            <option value="">Select a Payment Type</option>
+                                            <option value="G-Cash">G-Cash</option>
+                                            <option value="BDO">BDO Unibank, Inc.</option>
+                                            <option value="Metrobank">Metropolitan Bank and Trust Company (Metrobank)</option>
+                                            <option value="BPI">Bank of the Philippine Islands (BPI)</option>
+                                            <option value="PNB">Philippine National Bank (PNB)</option>
+                                            <option value="Landbank">Land Bank of the Philippines (Landbank)</option>
+                                            <option value="SecurityBank">Security Bank Corporation</option>
+                                            <option value="Chinabank">China Banking Corporation (Chinabank)</option>
+                                            <option value="UnionBank">Union Bank of the Philippines (UnionBank)</option>
+                                            <option value="DBP">Development Bank of the Philippines (DBP)</option>
+                                            <option value="RCBC">Rizal Commercial Banking Corporation (RCBC)</option>
+                                            <option value="PSBank">Philippine Savings Bank (PSBank)</option>
+                                            <option value="ChinaBankSavings">China Bank Savings</option>
+                                            <option value="CitySavingsBank">City Savings Bank</option>
+                                            <option value="Maybank">Maybank Philippines, Inc.</option>
+                                            <option value="EastWestBank">EastWest Bank</option>
+                                            <option value="BDONetworkBank">BDO Network Bank</option>
+                                            <option value="FICO">First Isabela Cooperative Bank (FICO Bank)</option>
+                                            <option value="CebuanaLhuillierBank">Cebuana Lhuillier Rural Bank, Inc.</option>
+                                            <option value="RuralBankAngeles">Rural Bank of Angeles, Inc.</option>
+                                            <option value="RuralBankSanLeonardo">Rural Bank of San Leonardo (N.E.) Inc.</option>
+                                            <option value="Maya">Maya</option>
+                                            <option value="UnionDigitalBank">UnionDigital Bank</option>
+                                            <option value="GoTymeBank">GoTyme Bank</option>
+                                            <option value="Tonik">Tonik</option>
+                                            <option value="UNO">UNO Digital Bank</option>
+                                            <option value="OFBank">OFBank</option>
+                                            {{-- @if (!empty($options))
+                                                @foreach ($options as $option)
+                                                    <option value="{{ $option->bank }}" {{ old('payment_type', $order->payment_type ?? '') == $option->bank ? 'selected' : '' }}>{{ $option->bank }}</option>
+                                                @endforeach
+                                            @endif --}}
+                                        </select>
+                                        @if ($errors->has('payment_type'))
+                                            <span class="invalid-feedback" style="display: block;" role="alert">
+                                                <strong>{{ $errors->first('payment_type') }}</strong>
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    <hr>
+                                    <p><i class="fa fa-info-circle"></i> <strong>IMPORTANT:</strong> Please ensure you send the exact amount required. We cannot process refunds for incorrect payments. Double-check your payment before completing the transaction. Thank you for your understanding!</p>
                                 </div>
-                                <label for="payment">Payment</label>
-                                <input type="file" class="form-control" id="payment" name="payment" placeholder="Payment" accept="image/*" {{ !empty($order->payment) ?: 'required' }} />
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="payment_reference">Reference No.</label>
-                                <input type="text" class="form-control" id="payment_reference" name="payment_reference" placeholder="Enter Reference no." value="{{ old('payment_reference', $order->payment_reference ?? '') }}" required />
-                                @if ($errors->has('payment_reference'))
-                                    <span class="invalid-feedback" style="display: block;" role="alert">
-                                        <strong>{{ $errors->first('payment_reference') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
+                                <div class="col-lg-6">
+                                        <div class="type_details">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">
+                                                    G-Cash
+                                                </h4>
+                                            </div>
+                                            <div class="card-body text-center">
+                                                <div class="qr-display">
+                                                    @if (!empty($option->qr))
+                                                        <img src="{{ Storage::url($option->qr) }}" alt="Payment QR Code" style="width: 450px; height: 400px; object-fit: cover;">
+                                                    @endif
+                                                </div>
+                                                <h5 class="mt-3"><b>Account/Phone Number</b>: {{ $option->number ?? '' }}</h5>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div class="form-group mb-3">
-                                <label for="payment_type">Payment Type</label>
-                                <select name="payment_type" id="payment_type" class="form-control form-select">
-                                    <option value="">Select a Payment Type</option>
-                                    @foreach ($options as $option)
-                                        <option value="{{ $option->bank }}" {{ old('payment_type', $order->payment_type ?? '') == $option->bank ? 'selected' : '' }}>{{ $option->bank }}</option>
-                                    @endforeach
-                                </select>
-                                @if ($errors->has('payment_type'))
-                                    <span class="invalid-feedback" style="display: block;" role="alert">
-                                        <strong>{{ $errors->first('payment_type') }}</strong>
-                                    </span>
-                                @endif
+                                    {{-- <p class="text-center"><i>Click <a href="{{ route('user.payment.options') }}" target="_blank">here</a> to view payment options.</i></p> --}}
+                                </div>
                             </div>
-
-                            <div class="type_details"></div>
-
-                            <p class="text-center"><i>Click <a href="{{ route('user.payment.options') }}" target="_blank">here</a> to view payment options.</i></p>
-                            <hr>
-                            <p><i class="fa fa-info-circle"></i> <strong>IMPORTANT:</strong> Please ensure you send the exact amount required. We cannot process refunds for incorrect payments. Double-check your payment before completing the transaction. Thank you for your understanding!</p>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button class="btn btn-primary" form="paymentForm">Upload Payment</button>
+                        <button class="btn btn-primary btn-upload-payment" data-target="#paymentForm">Upload Payment</button>
                     </div>
                 </div>
             </div>
@@ -400,9 +452,16 @@
 @push('scripts')
     <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('plugins/isotope-3.0.6/isotope.pkgd.min.js') }}"></script>
+    <script src="{{ asset('plugins/select2/select2.min.js') }}"></script>
     <script>
-        const options = {{ Js::from($options) }};
+        const options = {{ Js::from($options ?? []) }};
         $(document).ready(function () {
+            $('.js-select2').each(function () {
+                $(this).select2({
+                    dropdownParent: $(this).data('dropdown-parent') ? $($(this).data('dropdown-parent')) : ''
+                });
+            })
+
             var $list = $('.product-list').isotope({
                 // options
                 itemSelector: '.product-item',
@@ -471,28 +530,69 @@
             });
 
             $('#payment_type').on('change', function () {
-                $('.type_details').html('');
+                if (options.length) {
+                    console.log('test');
+                    $('.type_details').html('');
 
-                var value = $(this).val();
-                if (value !== '') {
-                    var option = options.find(item => { return item.bank == value });
+                    var value = $(this).val();
+                    if (value !== '') {
+                        var option = options.find(item => { return item.bank == value });
 
-                    $('.type_details').html(`
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">
-                                    ${option.bank}
-                                </h4>
-                            </div>
-                            <div class="card-body text-center">
-                                <div class="qr-display">
-                                    ${option.qr ? `<img src="/storage/${option.qr}" alt="Payment QR Code" style="width: 450px; height: 400px; object-fit: cover;">` : ''}
+                        $('.type_details').html(`
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">
+                                        ${option.bank}
+                                    </h4>
                                 </div>
-                                <h5 class="mt-3"><b>Account/Phone Number</b>: ${option.number}</h5>
+                                <div class="card-body text-center">
+                                    <div class="qr-display">
+                                        ${option.qr ? `<img src="/storage/${option.qr}" alt="Payment QR Code" style="width: 450px; height: 400px; object-fit: cover;">` : ''}
+                                    </div>
+                                    <h5 class="mt-3"><b>Account/Phone Number</b>: ${option.number}</h5>
+                                </div>
                             </div>
-                        </div>
-                    `);
+                        `);
+                    }
                 }
+            });
+            
+
+            $('.btn-upload-payment').on('click', function () {
+                var $this = $(this);
+
+                if (!$($this.data('target'))[0].checkValidity())
+                {
+                    console.log($($this.data('target'))[0].reportValidity());
+                    return false;
+                }
+
+                const imageLoc = null;
+                const file = $('#payment')[0].files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imageLoc = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+
+                Swal.fire({
+                    html: `
+                            <p>Continue to upload the payment?</p>
+                            ${ imageLoc ? `<img src="${ imageLoc }" style="height: 100px; object-fit: contain; margin: auto;" />` : '' }
+                            <p><b>Reference</b>: ${ $('#payment_reference').val() }</p>
+                            <p class="mb-0"><b>Payment Type</b>: ${ $('#payment_type').val() }</p>
+                        `,
+                    icon: $this.data('icon'),
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
+                    confirmButtonText: 'Confirm',
+                }).then((result) => {
+                    if (result.value) {
+                        $($this.data('target')).submit();
+                    }
+                });
             });
         });
     </script>

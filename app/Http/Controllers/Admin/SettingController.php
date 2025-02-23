@@ -17,7 +17,15 @@ class SettingController extends Controller
             $options = json_decode($payments->content);
         }
 
-        return view('admin.settings.index', compact('options'));
+        $option = null;
+        foreach ($options as $option) {
+            if (in_array(strtolower($option->bank), ['gcash', 'g-cash'])) {
+                $option = $option;
+                break;
+            }
+        }
+
+        return view('admin.settings.index', compact('option'));
     }
 
     public function savePayments(Request $request)
@@ -25,16 +33,19 @@ class SettingController extends Controller
         $validate = $request->validate([
             'data.*.bank' => 'required',
             'data.*.number' => 'required',
-            'data.*.qr' => 'required'
+            'data.*.qr' => 'required',
+            'data.*.previous_qr' => 'nullable'
         ]);
 
         foreach ($validate['data'] as $key => $data) {
             if (!empty($data['qr'])) {
                 $path = Storage::disk('public')->put('/attachments/settings', $data['qr']);
                 $validate['data'][$key]['qr'] = $path;
+            } elseif (!empty($data['previous_qr'])) {
+                $validate['data'][$key]['qr'] = $data['previous_qr'];
             }
         }
-        
+
         $qr_payment = Setting::where('slug', 'payments')->first();
         if (!empty($qr_payment)) {
             $qr_payment->content = json_encode($validate['data']);

@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="">
-                    <button type="button" class="btn btn-primary btn-round btn-add float-end">Add Payment Option +</button>
+                    <!-- <button type="button" class="btn btn-primary btn-round btn-add float-end">Add Payment Option +</button> -->
                     <h4 class="mt-0">
                         Payment Options
                     </h4>
@@ -21,7 +21,7 @@
                 <form action="{{ route('admin.settings.save.payments') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <div class="row payment-list">
+                    {{-- <div class="row payment-list">
                         @if (count($options))
                             @foreach ($options as $option)
                                 <div class="payment-item col-md-4">
@@ -35,6 +35,7 @@
                                             <div class="qr-display">
                                                 @if (!empty($option->qr))
                                                     <img src="{{ Storage::url($option->qr) }}" alt="Payment QR Code" style="width: 250px; height: 200px; object-fit: cover;">
+                                                    <input type="hidden" class="form-control" id="data[{{ $loop->index }}][previous_qr]" name="data[{{ $loop->index }}][previous_qr]" value="{{ Storage::url($option->qr) }}" >
                                                 @endif
                                             </div>
                                             <div class="form-group mb-3">
@@ -64,7 +65,7 @@
                                     <div class="card-body">
                                         <div class="form-group mb-3">
                                             <label for="data[0][bank]">Bank Name</label>
-                                            <input type="text" class="form-control" id="data[0][bank]" name="data[0][bank]" placeholder="Bank Name" required />
+                                            <input type="text" class="form-control" id="data[0][bank]" name="data[0][bank]" placeholder="Bank Name" value="G-Cash" required />
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="data[0][number]">Account/Phone Number</label>
@@ -78,8 +79,37 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
+                    </div> --}}
                     
+                    <div class="payment-item col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="qr-display">
+                                    @if (!empty($option->qr))
+                                        <img src="{{ Storage::url($option->qr) }}" alt="Payment QR Code" style="width: 250px; height: 200px; object-fit: cover;">
+                                        <input type="hidden" class="form-control" id="data[0][previous_qr]" name="data[0][previous_qr]" value="{{ Storage::url($option->qr) }}" >
+                                    @endif
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="data[0][bank]">Bank Name</label>
+                                    <input type="text" class="form-control disabled" id="data[0][bank]" name="data[0][bank]" placeholder="Bank Name" value="G-Cash" readonly />
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="data[0][number]">Account/Phone Number</label>
+                                    <input type="text" class="form-control" id="data[0][number]" name="data[0][number]" placeholder="Account/Phone Number" value="{{ $option->number ?? '' }}" required />
+                                </div>
+                                <div class="design-form my-3">
+                                    <label for="data[0][qr]">QR Code (optional)</label>
+                                    <input type="file" class="form-control" id="data[0][qr]" name="data[0][qr]" placeholder="QR Code" accept="image/*" {{ !empty($option->qr) ? '' : 'required' }} />
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-info btn-round">Save Payment Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- <div class="card payment-item col-md-4 d-none">
                         <div class="card-body">
@@ -109,11 +139,11 @@
                         </div>
                     </div> --}}
 
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="col-md-12 text-center">
                             <button type="submit" class="btn btn-info btn-round">Save Payment Details</button>
                         </div>
-                    </div>
+                    </div> -->
                 </form>
             </div>
         </div>

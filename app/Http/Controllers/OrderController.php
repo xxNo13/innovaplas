@@ -72,7 +72,16 @@ class OrderController extends Controller
         if (!empty($payments)) {
             $options = json_decode($payments->content);
         }
-        return view('orders.show', compact('order', 'products', 'options'));
+
+        $option = null;
+        foreach ($options as $option) {
+            if (in_array(strtolower($option->bank), ['gcash', 'g-cash'])) {
+                $option = $option;
+                break;
+            }
+        }
+
+        return view('orders.show', compact('order', 'products', 'option'));
     }
 
     public function uploadPayment(Request $request, $id)
